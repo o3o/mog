@@ -47,6 +47,7 @@ unittest {
    printer.clearBuffer();
    command.executeReceived("^@");
 }
+
 unittest {
    import examplemock;
    auto command = new ICommandMock();
@@ -55,6 +56,4 @@ unittest {
    command.setSizeReceived(5);
    command.executeReceivedAny();
    command.executeReceived("Ax");
-
-
 }

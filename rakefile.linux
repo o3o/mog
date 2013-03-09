@@ -1,0 +1,90 @@
+# per compilare con i file di risorse togliere i commenti (1)
+# per usare con unit test togliere i commenti (2)
+require 'rake/clean'
+require 'rake/packagetask'
+
+
+##################
+# SETTING
+##################
+VERSION = '0.1.0'
+
+SRC = FileList['*.d']
+NAME = 'mog'
+IMPORTS = ''
+
+BUILD_DIR = "."
+
+
+#-pkg:glade-sharp-2.0  -pkg:mono-cairo -pkg:gtk-sharp-2.0
+DFLAGS = ''
+PKG_FILES = FileList["#{BUILD_DIR}/#{NAME}", "#{SRC}"]
+
+
+##############################
+# PROGRAM
+##############################
+DMD = "dmd"
+CTAGS = "etags"
+
+##############################
+# CODING
+##############################
+FULL_NAME="#{BUILD_DIR}/#{NAME}"
+IMPORTS_OPT = IMPORTS.empty? ? "" : "-I#{IMPORTS.join(':')}"  
+opt = ENV['opt']
+SCRIPT = "#{DMD} #{DFLAGS} #{opt} -of#{FULL_NAME} #{IMPORTS_OPT} #{SRC}"
+
+CLEAN.include('*.o')
+CLOBBER.include("#{FULL_NAME}")
+
+directory BUILD_DIR
+
+task :default => :compile
+
+
+task :compile => FULL_NAME
+file FULL_NAME => FileList[SRC] do |t|
+  Rake::Task[:force].invoke
+end
+
+
+task :force do
+  sh "#{SCRIPT}" 
+end
+
+
+task :dry do
+  puts "#{SCRIPT}" 
+end
+
+desc "Create tags file"
+task :tags => SRC do
+  sh "#{CTAGS} #{SRC}"
+end
+
+task :test => [SRC] do
+  sh "rdmd --main -unittest #{SRC}" 
+end 
+
+
+task :make_script do
+  File.open('build.sh', 'w') do |file|
+    file.puts "#{SCRIPT}"
+  end
+end
+
+
+task :ver do
+  puts "#{VERSION}"
+end
+
+
+
+
+Rake::PackageTask.new(NAME, VERSION) do |p|
+  p.need_tar_bz2 = true
+  p.need_zip = false
+  p.need_tar = false
+  p.package_files = PKG_FILES
+end

@@ -14,12 +14,12 @@ SRC = FileList['*.d']
 CLEAN.include('*.o', 'examplemock.d', 'example.json')
 
 task :default => :test
-file "example.json" => "example.d" do 
-  sh "~/dscanner --json example.d > example.json"
+file "example.d.json" => "example.d" do 
+  sh "~/dscanner --json example.d > example.d.json"
 end
 
-file "examplemock.d" => "example.json" do 
-  sh "../mog example.json > examplemock.d"
+file "examplemock.d" => "example.d.json" do 
+  sh "../mog example.d.json > examplemock.d"
 end
 
 

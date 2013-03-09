@@ -3,6 +3,21 @@ import std.file;
 import std.json;
 import std.string;
 
+void main(string[] args) {
+   writeln("//" ~ args[1]);
+   string content = readText(args[1]);
+
+   JSONValue root = parseJSON(content);
+
+   writeln("import example;");
+   writeln("version (mock) {");
+   foreach (iface; root["interfaces"].array) {
+      generateClass(iface);
+   }
+   writeln("}");
+}
+
+
 void generateClass(JSONValue member) {
    writeln("   class ", member["name"].str, "Mock: ", member["name"].str, " {");
    foreach (fun; member["functions"].array) {
@@ -14,15 +29,13 @@ void generateClass(JSONValue member) {
    }   
    writeln("   }");
 }
+
 void generateFunc(JSONValue fun) {
    writeln("      ", "private bool ", fun["name"].str, "Done = false;");
-   
    
    foreach (p; fun["parameters"].array) {
       writeln("      ", "private ", p["type"].str, " ", fun["name"].str, "_", p["name"].str, ";");
    }  
-
-
 
    writeln("      ", fun["returnType"].str, " " , fun["name"].str, "(", getArgs(fun), ") {");
    writeln("         ", fun["name"].str, "Done = true;");
@@ -72,14 +85,4 @@ string getArgs(JSONValue member) {
 }
 
 
-void main() {
-   string content = readText("example.json");
-   JSONValue root = parseJSON(content);
 
-   writeln("import example;");
-   writeln("version (mock) {");
-   foreach (iface; root["interfaces"].array) {
-      generateClass(iface);
-   }
-   writeln("}");
-}
